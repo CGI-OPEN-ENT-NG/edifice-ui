@@ -48,10 +48,13 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
   const { messages, msgLink, zimbraWorkflow } = useConversation();
   const { user, avatar } = useUser();
   const { currentLanguage, currentApp } = useEdificeClient();
+  const { theme } = useEdificeTheme();
+  const isCampusNumerique = theme?.themeName === 'campus-numerique';
   const hasOldHelpEnableWorkflow =
     useHasWorkflow(
       'org.entcore.portal.controllers.PortalController|oldHelpEnable',
     ) || false;
+  const helpEnabled = isCampusNumerique || hasOldHelpEnableWorkflow;
 
   const hasCarbonioPreauthWorkflow =
     useHasWorkflow(
@@ -64,7 +67,7 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
     parsedContent,
     parsedHeadline,
     error,
-  } = useHelp(hasOldHelpEnableWorkflow);
+  } = useHelp(helpEnabled);
 
   const classes = clsx('header d-print-none', {
     'no-2d': is1d,
@@ -88,8 +91,6 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
   } = useHeader({ user, avatar });
 
   const hasMessages = messages > 0;
-
-  const { theme } = useEdificeTheme();
 
   return (
     <header className={classes}>
@@ -166,7 +167,7 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
                     <IconOneProfile className="icon user" />
                   </NavLink>
                 </NavItem>
-                {currentLanguage === 'fr' && hasOldHelpEnableWorkflow ? (
+                {currentLanguage === 'fr' && helpEnabled ? (
                   <NavItem>
                     <button
                       className="nav-link"
@@ -267,93 +268,107 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
       ) : (
         <Navbar className="navbar-expand-md">
           <div className="container-fluid">
-            <Logo src={`${src}/img/illustrations/logo.png`} />
-            <a
-              href={currentApp ? currentApp.address : '/timeline/timeline'}
-              className="navbar-title text-truncate d-md-none"
-            >
-              {title}
-            </a>
-            <ul className="navbar-nav">
-              <NavItem>
-                <NavLink link="/timeline/timeline" translate={t('navbar.home')}>
-                  <IconHome color="#fff" />
-                </NavLink>
-              </NavItem>
-              <NavItem
-                className="position-relative"
-                ref={appsRef}
-                id={popoverAppsId}
-                aria-haspopup="true"
-                aria-expanded={isAppsHovered}
-              >
-                <NavLink link="/welcome" translate={t('navbar.applications')}>
-                  <IconMyApps color="#fff" />
-                </NavLink>
-                <Popover
-                  className="top-100 widget"
-                  id={popoverAppsId}
-                  isVisible={isAppsHovered}
+            {!isCampusNumerique && (
+              <>
+                <Logo src={`${src}/img/illustrations/logo.png`} />
+                <a
+                  href={currentApp ? currentApp.address : '/timeline/timeline'}
+                  className="navbar-title text-truncate d-md-none"
                 >
-                  <PopoverBody>
-                    <WidgetAppsBody bookmarkedApps={bookmarkedApps} />
-                  </PopoverBody>
-                  <PopoverFooter className="widget-footer border-top border-ghost">
-                    <WidgetAppsFooter />
-                  </PopoverFooter>
-                </Popover>
-              </NavItem>
-              {conversationWorflow && (
-                <NavItem>
-                  <NavLink
+                  {title}
+                </a>
+              </>
+            )}
+            <ul className="navbar-nav">
+              {!isCampusNumerique && (
+                <>
+                  <NavItem>
+                    <NavLink
+                      link="/timeline/timeline"
+                      translate={t('navbar.home')}
+                    >
+                      <IconHome color="#fff" />
+                    </NavLink>
+                  </NavItem>
+                  <NavItem
                     className="position-relative"
-                    link="/conversation/conversation"
-                    translate={t('conversation')}
+                    ref={appsRef}
+                    id={popoverAppsId}
+                    aria-haspopup="true"
+                    aria-expanded={isAppsHovered}
                   >
-                    <IconNeoMessaging color="#fff" />
-                    {hasMessages && (
-                      <Badge
-                        variant={{ type: 'notification', level: 'warning' }}
-                        className="position-absolute"
+                    <NavLink
+                      link="/welcome"
+                      translate={t('navbar.applications')}
+                    >
+                      <IconMyApps color="#fff" />
+                    </NavLink>
+                    <Popover
+                      className="top-100 widget"
+                      id={popoverAppsId}
+                      isVisible={isAppsHovered}
+                    >
+                      <PopoverBody>
+                        <WidgetAppsBody bookmarkedApps={bookmarkedApps} />
+                      </PopoverBody>
+                      <PopoverFooter className="widget-footer border-top border-ghost">
+                        <WidgetAppsFooter />
+                      </PopoverFooter>
+                    </Popover>
+                  </NavItem>
+                  {conversationWorflow && (
+                    <NavItem>
+                      <NavLink
+                        className="position-relative"
+                        link="/conversation/conversation"
+                        translate={t('conversation')}
                       >
-                        {messages}
-                      </Badge>
-                    )}
-                  </NavLink>
-                </NavItem>
-              )}
-              {zimbraWorkflow && (
-                <NavItem>
-                  <NavLink
-                    className="position-relative"
-                    link={msgLink}
-                    translate={t('conversation')}
-                  >
-                    <IconNeoMessaging color="#fff" />
-                    {hasMessages && (
-                      <Badge
-                        variant={{ type: 'notification', level: 'warning' }}
-                        className="position-absolute"
+                        <IconNeoMessaging color="#fff" />
+                        {hasMessages && (
+                          <Badge
+                            variant={{ type: 'notification', level: 'warning' }}
+                            className="position-absolute"
+                          >
+                            {messages}
+                          </Badge>
+                        )}
+                      </NavLink>
+                    </NavItem>
+                  )}
+                  {zimbraWorkflow && (
+                    <NavItem>
+                      <NavLink
+                        className="position-relative"
+                        link={msgLink}
+                        translate={t('conversation')}
                       >
-                        {messages}
-                      </Badge>
-                    )}
-                  </NavLink>
-                </NavItem>
+                        <IconNeoMessaging color="#fff" />
+                        {hasMessages && (
+                          <Badge
+                            variant={{ type: 'notification', level: 'warning' }}
+                            className="position-absolute"
+                          >
+                            {messages}
+                          </Badge>
+                        )}
+                      </NavLink>
+                    </NavItem>
+                  )}
+                  {hasCarbonioPreauthWorkflow && (
+                    <NavItem>
+                      <a
+                        className="nav-link position-relative"
+                        href="/auth/carbonio/preauth"
+                        target="_blank"
+                      >
+                        <IconNeoMessaging color="#fff" />
+                        <VisuallyHidden>{t('conversation')}</VisuallyHidden>
+                      </a>
+                    </NavItem>
+                  )}
+                </>
               )}
-              {hasCarbonioPreauthWorkflow && (
-                <NavItem>
-                  <a
-                    className="nav-link position-relative"
-                    href="/auth/carbonio/preauth"
-                    target="_blank"
-                  >
-                    <IconNeoMessaging color="#fff" />
-                    <VisuallyHidden>{t('conversation')}</VisuallyHidden>
-                  </a>
-                </NavItem>
-              )}
-              {currentLanguage === 'fr' && hasOldHelpEnableWorkflow ? (
+              {currentLanguage === 'fr' && helpEnabled ? (
                 <NavItem>
                   <button
                     className="nav-link btn btn-naked"
@@ -374,82 +389,84 @@ const Header = ({ is1d = false, src = '' }: HeaderProps): JSX.Element => {
                   />
                 </NavItem>
               ) : null}
-              <NavItem>
-                <div className="dropdown">
-                  <button
-                    className="nav-link btn btn-naked d-md-none"
-                    type="button"
-                    aria-controls="dropdown-navbar"
-                    aria-expanded={!isCollapsed}
-                    aria-label={t('navbar.open.menu')}
-                    onClick={toggleCollapsedNav}
-                  >
-                    <IconRafterDown
-                      className="icon rafter-down"
-                      width="20"
-                      height="20"
-                      color="#fff"
-                    />
-                  </button>
-                  <ul
-                    className={`dropdown-menu dropdown-menu-end ${
-                      !isCollapsed ? 'show' : ''
-                    }`}
-                    id="dropdown-navbar"
-                  >
-                    {communitiesWorkflow && (
+              {!isCampusNumerique && (
+                <NavItem>
+                  <div className="dropdown">
+                    <button
+                      className="nav-link btn btn-naked d-md-none"
+                      type="button"
+                      aria-controls="dropdown-navbar"
+                      aria-expanded={!isCollapsed}
+                      aria-label={t('navbar.open.menu')}
+                      onClick={toggleCollapsedNav}
+                    >
+                      <IconRafterDown
+                        className="icon rafter-down"
+                        width="20"
+                        height="20"
+                        color="#fff"
+                      />
+                    </button>
+                    <ul
+                      className={`dropdown-menu dropdown-menu-end ${
+                        !isCollapsed ? 'show' : ''
+                      }`}
+                      id="dropdown-navbar"
+                    >
+                      {communitiesWorkflow && (
+                        <NavItem>
+                          <a
+                            href="/communities"
+                            className="nav-link dropdown-item"
+                          >
+                            <IconCommunities className="icon communities" />
+                            <span className="nav-text">
+                              {t('navbar.community')}
+                            </span>
+                          </a>
+                        </NavItem>
+                      )}
+                      {searchWorkflow ? <SearchEngine /> : null}
                       <NavItem>
                         <a
-                          href="/communities"
+                          href="/userbook/mon-compte"
                           className="nav-link dropdown-item"
                         >
-                          <IconCommunities className="icon communities" />
+                          <Avatar
+                            alt={userName}
+                            size="sm"
+                            src={userAvatar}
+                            variant="circle"
+                            className="bg-white"
+                            width="32"
+                            height="32"
+                          />
                           <span className="nav-text">
-                            {t('navbar.community')}
+                            {t('navbar.myaccount')}
                           </span>
                         </a>
                       </NavItem>
-                    )}
-                    {searchWorkflow ? <SearchEngine /> : null}
-                    <NavItem>
-                      <a
-                        href="/userbook/mon-compte"
-                        className="nav-link dropdown-item"
-                      >
-                        <Avatar
-                          alt={userName}
-                          size="sm"
-                          src={userAvatar}
-                          variant="circle"
-                          className="bg-white"
-                          width="32"
-                          height="32"
-                        />
-                        <span className="nav-text">
-                          {t('navbar.myaccount')}
-                        </span>
-                      </a>
-                    </NavItem>
-                    <NavItem>
-                      <hr className="dropdown-divider" />
-                    </NavItem>
-                    <NavItem>
-                      <a
-                        href={
-                          '/auth/logout?callback=' +
-                          (theme?.logoutCallback ?? '')
-                        }
-                        className="nav-link dropdown-item"
-                      >
-                        <IconDisconnect className="icon logout" />
-                        <span id="logout-label" className="nav-text">
-                          {t('navbar.disconnect')}
-                        </span>
-                      </a>
-                    </NavItem>
-                  </ul>
-                </div>
-              </NavItem>
+                      <NavItem>
+                        <hr className="dropdown-divider" />
+                      </NavItem>
+                      <NavItem>
+                        <a
+                          href={
+                            '/auth/logout?callback=' +
+                            (theme?.logoutCallback ?? '')
+                          }
+                          className="nav-link dropdown-item"
+                        >
+                          <IconDisconnect className="icon logout" />
+                          <span id="logout-label" className="nav-text">
+                            {t('navbar.disconnect')}
+                          </span>
+                        </a>
+                      </NavItem>
+                    </ul>
+                  </div>
+                </NavItem>
+              )}
             </ul>
           </div>
         </Navbar>

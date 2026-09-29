@@ -31,3 +31,18 @@
     }
   }
 }
+
+[data-product='neo'][data-theme='campus-numerique'] {
+  --#{$prefix}primary: #1344a1;
+
+  .header {
+    .navbar {
+      background: var(--#{$prefix}primary);
+      min-height: 64px;
+
+      .navbar-nav {
+        margin-left: auto;
+      }
+    }
+  }
+}
