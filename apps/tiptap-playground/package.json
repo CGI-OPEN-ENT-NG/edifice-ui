@@ -25,8 +25,8 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@edifice.io/bootstrap": "workspace:edifice-bootstrap-cgi-campus@*",
-    "@edifice.io/react": "workspace:edifice-react-cgi-campus@*",
+    "@edifice.io/bootstrap": "workspace:@cgi-learning-hub/edifice-bootstrap@*",
+    "@edifice.io/react": "workspace:@cgi-learning-hub/edifice-react@*",
     "@edifice.io/client": "workspace:*",
     "@react-spring/web": "catalog:",
     "@tanstack/react-query": "catalog:",
